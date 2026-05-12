@@ -241,7 +241,7 @@ namespace SystemicOverload.EditorTools
 
             EnsureFolderPath(PrefabFolder);
             GameObject prefabAsset = PrefabUtility.SaveAsPrefabAsset(runtimeEnemy, PoolEnemyPrefabPath);
-            Object.DestroyImmediate(runtimeEnemy);
+            UnityEngine.Object.DestroyImmediate(runtimeEnemy);
             return prefabAsset;
         }
 
@@ -352,7 +352,7 @@ namespace SystemicOverload.EditorTools
                 return;
             }
 
-            Object.DestroyImmediate(targetComponent);
+            UnityEngine.Object.DestroyImmediate(targetComponent);
         }
 
         private static void SetPrivateField<TTarget>(TTarget targetObject, string fieldName, object value)
