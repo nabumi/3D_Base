@@ -14,6 +14,7 @@ namespace StarterAssets
 		public bool sprint;
         public bool attack;
 		public bool point;
+		public bool interact;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -47,6 +48,10 @@ namespace StarterAssets
         public void OnPoint(InputValue value)
         {
             point = value.isPressed;
+        }
+        public void OnInteract(InputValue value)
+        {
+            interact = value.isPressed;
         }
         public void OnSprint(InputValue value)
 		{

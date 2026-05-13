@@ -1,5 +1,5 @@
 using UnityEngine;
-using StarterAssets; // 스타터 에셋과 연결하기 위해 필수!
+using StarterAssets;
 
 namespace StarterAssets
 {
@@ -7,33 +7,27 @@ namespace StarterAssets
     {
         public bool isAttacking = false;
         private Animator anim;
-        private StarterAssetsInputs _input; // 새로운 입력 시스템 참조
+        private StarterAssetsInputs _input;
         private ThirdPersonController _controller;
 
         [Header("Attack Settings")]
-        public Transform attackPoint;
-        public float attackRange = 0.5f;
-        public LayerMask enemyLayer;
+        [SerializeField] private Transform attackPoint;    // 공격 중심점 (플레이어 앞)
+        [SerializeField] private float attackRange = 1.5f; // 공격 반지름 (1.5~2m)
+        [SerializeField] private LayerMask enemyLayer;     // 대상 레이어 (Enemy)
+        [SerializeField] private int damage = 20;          // 대미지 (10~20)
 
         private void Awake()
         {
             anim = GetComponent<Animator>();
-            // 같은 오브젝트에 있는 StarterAssetsInputs 스크립트를 가져옵니다.
             _input = GetComponent<StarterAssetsInputs>();
             _controller = GetComponent<ThirdPersonController>();
         }
 
         private void Update()
         {
-            // [중요] Input.GetMouseButtonDown 대신 _input.attack을 사용합니다!
             if (_input != null && _input.attack && !isAttacking)
             {
                 Attack();
-            }
-
-            if (_input != null && _input.point && !isAttacking)
-            {
-                Point();
             }
         }
 
@@ -41,28 +35,30 @@ namespace StarterAssets
         {
             isAttacking = true;
 
-            if (_controller != null)
-            {
-   
-                _controller.LaunchCharacter(6.0f);
-            }
 
+            if (_controller != null) _controller.LaunchCharacter(6.0f);
             if (anim != null) anim.SetTrigger("Attack1");
 
-            // 공격 버튼을 한 번 눌렀을 때 한 번만 동작하도록 false로 초기화
+            Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayer);
+
+            foreach (Collider enemy in hitEnemies)
+            {
+                if (enemy.TryGetComponent(out Enemy targetEnemy))
+                {
+                    targetEnemy.TakeDamage(damage);
+                    Debug.Log($"{enemy.name}에게 {damage} 대미지!");
+                }
+            }
+
             _input.attack = false;
         }
-        void Point()
-        {
-            isAttacking = true; // 가리키는 동안 이동 제한을 위해 true 설정
-            if (anim != null) anim.SetTrigger("Point"); // 애니메이터의 Trigger 이름
-            _input.point = false;
-        }
 
-        // 애니메이션 이벤트(EndAttack)에서 호출될 함수
-        public void EndAttack()
+        public void EndAttack() => isAttacking = false;
+        private void OnDrawGizmosSelected()
         {
-            isAttacking = false;
+            if (attackPoint == null) return;
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
         }
     }
 }
